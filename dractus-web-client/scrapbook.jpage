@@ -1,0 +1,54 @@
+String x =  "x1w10"; //"x1w1#";//"LÃ©a";
+int index = 0;
+boolean allLettersAndDigits = true;
+for(index = 0; index < x.length(); index++) {
+	boolean letterOrDigit = Character.isLetter(x.charAt(index)) || 
+			Character.isDigit(x.charAt(index));
+	if(!letterOrDigit){
+		allLettersAndDigits = false;
+	}
+}
+allLettersAndDigits
+
+int i = 0;
+while (i < 20) {
+	long sample1 = System.currentTimeMillis();
+	System.out.println("" + sample1);
+	Thread.currentThread().sleep(500 + 
+		sample1 - (sample1 /1000 * 1000));
+	long sample1Last4 = sample1 - (sample1 / 10000 * 10000);
+	++i;
+	long sample2 = System.currentTimeMillis();
+	System.out.println("" + sample2);
+	Thread.currentThread().sleep(500 + 
+			sample2 - (sample2 /1000 * 1000));
+	long sample2Last4 = sample2 - (sample2 / 10000 * 10000);
+	
+	// id = sample1's last 4 + sample2's last 4
+	long randomId = (sample1Last4 * 10000) + sample2Last4; 
+	System.out.println("" + randomId);
+	
+	Thread.currentThread().sleep(5500);
+}
+
+long time = 90090000000L; //System.currentTimeMillis();
+long randomId = time - (time / 100000000L * 100000000L);
+if (randomId < 10000000L) randomId += 10000000L;
+randomId
+
+long evenId;
+
+if((randomId) % 2 == 0){
+	evenId = randomId;
+} else {
+	evenId = randomId + 1;
+}
+
+java.text.NumberFormat ACCOUNT_NUMBER_FORMAT;
+
+String pattern = "";
+for (int i = 0; i < 15; i++) {
+    pattern += String.valueOf(0);
+}
+ACCOUNT_NUMBER_FORMAT = new java.text.DecimalFormat(pattern);
+ACCOUNT_NUMBER_FORMAT.format(null);An exception occurred during evaluation:  java.lang.IllegalArgumentException
