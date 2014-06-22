@@ -5,16 +5,19 @@ import com.dractus.controller.dashboard.business.BusinessExpensesCtrl;
 
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFPrintSetup;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
+//import org.apache.poi.xssf.usermodel.*; //possible new library we can use
 import org.springframework.stereotype.Service;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -86,6 +89,10 @@ public class ExportExcelService {
                               Double amountSum, Double chargedSum, Double withoutTaxSum) throws Exception {
 
         HSSFSheet sheet = wb.createSheet(String.valueOf(counterSheet));
+        
+        //Set to Landscape
+        sheet.getPrintSetup().setLandscape(true);
+        sheet.getPrintSetup().setPaperSize(HSSFPrintSetup.A5_PAPERSIZE); 
 
         List oldObjects = new ArrayList();
 
@@ -147,7 +154,7 @@ public class ExportExcelService {
                     fields[i].setAccessible(true);
                     //make font red if negative, while setting value
                     currentColumn.addCellStyle(styleRedFont, false);
-                    addCellValueByTypes(cell, fields[i].getType(),
+                    addCellValueByTypes(wb, i, cell, fields[i].getType(),
                             fields[i].get(o), styleRedFont);
                 }
             }
@@ -233,8 +240,10 @@ public class ExportExcelService {
         return cell;
     }
 
-    private void addCellValueByTypes(Cell cell, Class type, Object value, HSSFCellStyle styleRedFont)
+    private void addCellValueByTypes(HSSFWorkbook wb, int index, Cell cell, Class type, Object value, HSSFCellStyle styleRedFont)
             throws Exception {
+    	//DEBUG 
+    	//System.out.println("***Index: " + index + " Type: " + type);
         if (value == null) {
             cell.setCellValue("");
         } else if (type.equals(Long.class)) {
@@ -252,11 +261,18 @@ public class ExportExcelService {
             	cell.setCellStyle(styleRedFont);
             }
         } else if (type.equals(Date.class)) {
-            SimpleDateFormat format = customDataFormat("MM/dd/yyyy");
-            Date date = (Date) value;
-            cell.setCellValue(format.format(date));
+        	//This should be optimized so we don't create a dateStyle for EACH cell. For now it'll be GC'd after export
+        	HSSFCellStyle dateStyle = wb.createCellStyle();
+        	dateStyle.setDataFormat((short)0xe);
+
+        	cell.setCellStyle(dateStyle);
+        	
+            //SimpleDateFormat format = customDataFormat("MM/dd/yyyy");
+        	Date date = (Date) value;
+            cell.setCellValue(date);
+            cell.getCellStyle().setAlignment(CellStyle.ALIGN_LEFT);
         } else if (type.equals(String.class)) {
-            cell.setCellValue((String) value);
+        	cell.setCellValue((String) value);
         } else if (type.equals(BigDecimal.class)) {
         	BigDecimal cellValue = (BigDecimal) value;
             cell.setCellValue(((BigDecimal) value).doubleValue());
