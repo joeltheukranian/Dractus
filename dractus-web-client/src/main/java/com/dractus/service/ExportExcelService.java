@@ -63,10 +63,12 @@ public class ExportExcelService {
             
             myOut = response.getOutputStream();
 
-            int counterSheet = 1;
+//            for(int counterSheet = 1; counterSheet <= 2; ++counterSheet){
+                int counterSheet = 1;
+                createSheets(wb, counterSheet, dataList, excelMap, headerString,
+                        amountSum, chargedSum, withoutTaxSum);
+//            }
 
-            createSheets(wb, counterSheet, dataList, excelMap, headerString,
-                    amountSum, chargedSum, withoutTaxSum);
 
             // Write out the spreadsheet
             wb.write(myOut);
@@ -90,10 +92,45 @@ public class ExportExcelService {
 
         HSSFSheet sheet = wb.createSheet(String.valueOf(counterSheet));
         
-        //Set to Landscape
+        //Set to Landscape/legal
         sheet.getPrintSetup().setLandscape(true);
-        sheet.getPrintSetup().setPaperSize(HSSFPrintSetup.A5_PAPERSIZE); 
+        sheet.getPrintSetup().setPaperSize(HSSFPrintSetup.LEGAL_PAPERSIZE);
 
+        //autofit, fitToPage (setAutobreaks is also necessary)
+        //See https://issues.apache.org/bugzilla/show_bug.cgi?id=20497
+        
+//        sheet.getPrintSetup().setFitHeight((short)0);
+//        sheet.getPrintSetup().setFitWidth((short)1);
+//        sheet.setFitToPage(false); //commented out did NOT work
+//        sheet.setAutobreaks(true);
+
+        
+//        sheet.getPrintSetup().setFitHeight((short)0);/
+//        sheet.getPrintSetup().setFitWidth((short)1);
+////        sheet.setFitToPage(false); //commented out did NOT work
+////        sheet.setAutobreaks(true);
+
+        
+//        sheet.getPrintSetup().setFitHeight((short)0);
+//        sheet.getPrintSetup().setFitWidth((short)1);
+//        sheet.setFitToPage(false); //commented out did NOT work
+//        sheet.setAutobreaks(true);
+
+//another..nope
+//        sheet.setFitToPage(true);  // optionally; does not seem to have any effect 
+//        sheet.getPrintSetup().setFitWidth((short)1); 
+//        sheet.getPrintSetup().setFitHeight((short)0); 
+
+//        sheet.setFitToPage(true);  // optionally; does not seem to have any effect 
+//        sheet.getPrintSetup().setFitWidth((short)1); 
+//        sheet.getPrintSetup().setFitHeight((short)0); 
+//        sheet.setAutobreaks(true);
+
+        sheet.setFitToPage(true);  // optionally; does not seem to have any effect 
+        sheet.getPrintSetup().setFitWidth((short)1); 
+        sheet.getPrintSetup().setFitHeight((short)99); 
+        sheet.setAutobreaks(true);
+        
         List oldObjects = new ArrayList();
 
         Row row;
@@ -129,6 +166,11 @@ public class ExportExcelService {
 
             row = sheet.createRow(counterRow);
             row.setHeightInPoints(17.25f);
+            
+            //insert page page every 20 rows
+//            if((counterRow % 20) == 0){
+//            	sheet.setRowBreak(counterRow);
+//	            }
 
             Class currentClass = o.getClass();
             Field fields[] = currentClass.getDeclaredFields();
@@ -221,6 +263,12 @@ public class ExportExcelService {
             	cell.setCellStyle(styleRedFontForSum);
             }
         }
+
+        //autosize all columns. Done at end so that size can be computed
+        for (int i = 0; i < excelMap.values().size(); i++) {
+            sheet.autoSizeColumn(i);
+        }
+
     }
 
     private CellStyle getHeaderStyle(CellStyle currentCellStyle, Boolean isHead) {
